@@ -5,30 +5,22 @@ import resolvers from './resolvers';
 const typeDefs = `
 type Query {
   testString: String
-  author(firstName: String, lastName: String): Author
-  allAuthors: [Author]
-  getFortuneCookie: String
+  program: Program
+  allPrograms: [Program] 
 },
-type Author {
-  id: Int
-  firstName: String
-  lastName: String,
-  publisher: String,
-  posts: [Post],
-  comments: [Comment]
-},
-type Post {
+type Program {
   id: Int
   title: String
-  text: String
-  views: Int
-  author: Author
+  abstract: String
+  slot: Int
+  cases: [Case]
 },
-type Comment {
-  id: Int
+type Case {
   title: String
-  text: String
-  author: Author
+  country: String
+  year: Int
+  clock: Float
+  program: Program
 }
 `;
 

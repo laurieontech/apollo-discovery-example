@@ -1,62 +1,42 @@
 import Sequelize from 'sequelize';
 import casual from 'casual';
 import _ from 'lodash';
-import fetch from 'node-fetch';
-import Mongoose from 'mongoose';
 
 const db = new Sequelize('blog', null, null, {
   dialect: 'sqlite',
   storage: './blog.sqlite'
 });
 
-const AuthorModel = db.define('author', {
-  firstName: {
-    type: Sequelize.STRING
-  },
-  lastName: {
-    type: Sequelize.STRING
-  },
-  publisher: {
-    type: Sequelize.STRING
-  }
-});
-
-const PostModel = db.define('post', {
+const ProgramModel = db.define('program', {
   title: {
     type: Sequelize.STRING
   },
-  text: {
+  abstract: {
     type: Sequelize.STRING
+  },
+  slot: {
+    type: Sequelize.INTEGER
   }
 });
 
-const CommentModel = db.define('comment', {
+const CaseModel = db.define('case', {
   title: {
     type: Sequelize.STRING
   },
-  text: {
+  country: {
     type: Sequelize.STRING
+  },
+  year: {
+    type: Sequelize.INTEGER
+  },
+  clock: {
+    type: Sequelize.DOUBLE
   }
 });
 
 
-AuthorModel.hasMany(PostModel);
-AuthorModel.hasMany(CommentModel);
-PostModel.belongsTo(AuthorModel);
-CommentModel.belongsTo(AuthorModel);
-
-Mongoose.Promise = global.Promise;
-
-const mongo = Mongoose.connect('mongodb://localhost/views', {
-  useMongoClient: true
-});
-
-const ViewSchema = Mongoose.Schema({
-  postId: Number,
-  views: Number
-});
-
-const View = Mongoose.model('views', ViewSchema);
+ProgramModel.hasMany(CaseModel);
+CaseModel.belongsTo(ProgramModel);
 
 // modify the mock data creation to also create some views:
 casual.seed(123);
@@ -64,61 +44,26 @@ db.sync({
   force: true
 }).then(() => {
   _.times(10, () => {
-    return AuthorModel.create({
-      firstName: casual.first_name,
-      lastName: casual.last_name
-    }).then(author => { //wtf why?!?!?!
-      return author
-        .update({
-          publisher: casual.company_name
-        })
-        .then(author => {
-          return author
-            .createComment({
-              title: `A post by ${author.firstName}`,
-              text: casual.sentences(3)
-            })
-            .then(author => {
-              return author
-                .createPost({
-                  title: `A post by ${author.firstName}`,
-                  text: casual.sentences(3)
+    return ProgramModel.create({
+      title: casual.title,
+      abstract: casual.title,
+      slot: casual.integer(0)  
+    }).then(program => {
+              return program
+                .createCase({
+                  title: `${program.title} ${casual.integer(0)}`,
+                  country: casual.country,
+                  year: casual.year,
+                  clock: casual.double(0.0)
                 })
-                .then(post => {
-                  // <- the new part starts here
-                  // create some View mocks
-                  return View.update({
-                    postId: post.id
-                  }, {
-                    views: casual.integer(0, 100)
-                  }, {
-                    upsert: true
-                  });
-                });
             });
-        });
-    });
   });
 });
 
-const FortuneCookie = {
-  getOne() {
-    return fetch('http://fortunecookieapi.herokuapp.com/v1/cookie')
-      .then(res => res.json())
-      .then(res => {
-        return res[0].fortune.message;
-      });
-  }
-};
-
-const Author = db.models.author;
-const Post = db.models.post;
-const Comment = db.models.comment;
+const Program = db.models.program;
+const Case = db.models.case;
 
 export {
-  Author,
-  Post,
-  Comment,
-  View,
-  FortuneCookie
+  Program,
+  Case
 };

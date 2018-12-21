@@ -1,36 +1,22 @@
-import { Author, View, FortuneCookie } from './connectors';
+import { Program } from './connectors';
 
 const resolvers = {
   Query: {
-    author(_, args) {
-      return Author.findOne({ where: args });
+    program(_, args) {
+      return Program.findOne({ where: args });
     },
-    allAuthors() {
-      return Author.findAll();
-    },
-    getFortuneCookie() {
-      return FortuneCookie.getOne();
+    allPrograms() {
+      return Program.findAll({limit: 1});
     }
   },
-  Author: {
-    posts(author) {
-      return author.getPosts();
-    },
-    comments(author) {
-      return author.getComments();
+  Program: {
+    cases(program) {
+      return program.getCases();
     }
   },
-  Post: {
-    author(post) {
-      return post.getAuthor();
-    },
-    views(post) {
-      return View.findOne({ postId: post.id }).then(view => view.views);
-    }
-  },
-  Comment: {
-    author(comment) {
-      return comment.getAuthor();
+  Case: {
+    program(ca) {
+      return ca.getProgram();
     }
   }
 };
